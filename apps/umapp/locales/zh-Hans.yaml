@@ -112,6 +112,11 @@ deleteTitle:
   placeholders:
     Name: { type: String }
 deleteBody: "它的统计数据会一并删除，且无法恢复。"
+deletedWithWarning:
+  message: "{Name} 已删除，但 Cloudflare 上还有残留"
+  placeholders:
+    Name: { type: String }
+ok: "好"
 delete: "删除"
 cancel: "取消"
 deleting: "正在删除…"

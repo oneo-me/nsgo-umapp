@@ -112,6 +112,11 @@ deleteTitle:
   placeholders:
     Name: { type: String }
 deleteBody: "Its statistics go with it. This can't be undone."
+deletedWithWarning:
+  message: "{Name} is deleted, but not all of it on Cloudflare"
+  placeholders:
+    Name: { type: String }
+ok: "OK"
 delete: "Delete"
 cancel: "Cancel"
 deleting: "Deleting…"

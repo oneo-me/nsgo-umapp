@@ -43,12 +43,13 @@ func For(cx *core.Scope) Messages {
 // its method, for the TSX declarations of the messages
 // (tsx.RegisterMessages).
 var Parameters = map[string][]string{
-	"VersionLabel": {"Version"},
-	"Online":       {"Count"},
-	"LiveTooltip":  {"Count", "Unit"},
-	"TrayTooltip":  {"Count", "Unit"},
-	"ViewsLastDay": {"Count"},
-	"DeleteTitle":  {"Name"},
+	"VersionLabel":       {"Version"},
+	"Online":             {"Count"},
+	"LiveTooltip":        {"Count", "Unit"},
+	"TrayTooltip":        {"Count", "Unit"},
+	"ViewsLastDay":       {"Count"},
+	"DeleteTitle":        {"Name"},
+	"DeletedWithWarning": {"Name"},
 }
 
 // Translation is a language's messages another package supplies:
@@ -56,13 +57,14 @@ var Parameters = map[string][]string{
 // of the others; a key or a field left out leaves the message to the
 // catalog.
 type Translation struct {
-	Texts        map[string]string
-	VersionLabel func(Version string) string
-	Online       func(Count int) string
-	LiveTooltip  func(Count int, Unit string) string
-	TrayTooltip  func(Count int, Unit string) string
-	ViewsLastDay func(Count int) string
-	DeleteTitle  func(Name string) string
+	Texts              map[string]string
+	VersionLabel       func(Version string) string
+	Online             func(Count int) string
+	LiveTooltip        func(Count int, Unit string) string
+	TrayTooltip        func(Count int, Unit string) string
+	ViewsLastDay       func(Count int) string
+	DeleteTitle        func(Name string) string
+	DeletedWithWarning func(Name string) string
 }
 
 var supplied = map[string]Translation{}
@@ -157,6 +159,7 @@ const (
 	textCheckAgain
 	textDeleteWebsite
 	textDeleteBody
+	textOk
 	textDelete
 	textCancel
 	textDeleting
@@ -263,6 +266,7 @@ var keyOfText = [numTexts]string{
 	"checkAgain",
 	"deleteWebsite",
 	"deleteBody",
+	"ok",
 	"delete",
 	"cancel",
 	"deleting",
@@ -367,6 +371,7 @@ var textsEn = i18n.NewTexts(""+
 	"Check again"+
 	"Delete website"+
 	"Its statistics go with it. This can't be undone."+
+	"OK"+
 	"Delete"+
 	"Cancel"+
 	"Deleting…"+
@@ -468,6 +473,7 @@ var textsEn = i18n.NewTexts(""+
 		11,
 		14,
 		48,
+		2,
 		6,
 		6,
 		11,
@@ -572,6 +578,7 @@ var textsZhHans = i18n.NewTexts(""+
 	"重新检测"+
 	"删除网站"+
 	"它的统计数据会一并删除，且无法恢复。"+
+	"好"+
 	"删除"+
 	"取消"+
 	"正在删除…"+
@@ -673,6 +680,7 @@ var textsZhHans = i18n.NewTexts(""+
 		12,
 		12,
 		54,
+		3,
 		6,
 		6,
 		15,
@@ -758,6 +766,9 @@ func Supply(lang string, t Translation) {
 	}
 	if t.DeleteTitle != nil {
 		s.DeleteTitle = t.DeleteTitle
+	}
+	if t.DeletedWithWarning != nil {
+		s.DeletedWithWarning = t.DeletedWithWarning
 	}
 	supplied[lang] = s
 	Catalog.Add(lang)
@@ -1523,6 +1534,35 @@ func DeleteBody(cx *core.Scope) string { return For(cx).DeleteBody() }
 
 // DeleteBody is the package's DeleteBody in the language of msgs.
 func (msgs Messages) DeleteBody() string { return msgs.text(textDeleteBody) }
+
+// DeletedWithWarning says "{Name} is deleted, but not all of it on Cloudflare"
+// in the language the app shows under cx.
+func DeletedWithWarning(cx *core.Scope, Name string) string { return For(cx).DeletedWithWarning(Name) }
+
+// DeletedWithWarning is the package's DeletedWithWarning in the language of msgs.
+func (msgs Messages) DeletedWithWarning(Name string) string {
+	if i18n.IsPseudo(msgs.lang) {
+		return i18n.Pseudo(msgs.lang, Messages{lang: Source, mark: true}.DeletedWithWarning(Name))
+	}
+	for lang := msgs.lang; ; lang = i18n.Parent(lang) {
+		if f := supplied[lang].DeletedWithWarning; f != nil {
+			return f(Name)
+		}
+		switch lang {
+		case "", "en":
+			return msgs.arg(Name) + " is deleted, but not all of it on Cloudflare"
+		case "zh-Hans":
+			return Name + " 已删除，但 Cloudflare 上还有残留"
+		}
+	}
+}
+
+// Ok says "OK"
+// in the language the app shows under cx.
+func Ok(cx *core.Scope) string { return For(cx).Ok() }
+
+// Ok is the package's Ok in the language of msgs.
+func (msgs Messages) Ok() string { return msgs.text(textOk) }
 
 // Delete says "Delete"
 // in the language the app shows under cx.

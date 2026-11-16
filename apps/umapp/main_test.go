@@ -31,6 +31,8 @@ type fake struct {
 	// cf are the Cloudflare accounts' websites the own server lists, and cfErr what listing them fails with.
 	cf    []cfSite
 	cfErr error
+	// deleteWarning is what deleting a website warns of.
+	deleteWarning string
 }
 
 func newFake() *fake {
@@ -150,14 +152,14 @@ func (f *fake) updateWebsite(_ context.Context, id, name, domain string) (websit
 	return website{}, &apiError{status: 404}
 }
 
-func (f *fake) deleteWebsite(_ context.Context, id string) error {
+func (f *fake) deleteWebsite(_ context.Context, id string) (string, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.err != nil {
-		return f.err
+		return "", f.err
 	}
 	f.sites = slices.DeleteFunc(f.sites, func(w website) bool { return w.ID == id })
-	return nil
+	return f.deleteWarning, nil
 }
 
 func (f *fake) hasDashboard() bool { return !f.ownServer }
@@ -897,8 +899,8 @@ func TestClientUpdateDeleteWebsite(t *testing.T) {
 	if err != nil || got != (website{ID: "w", Name: "Shop", Domain: "shop.acme.dev"}) {
 		t.Errorf("%+v, %v", got, err)
 	}
-	if err := cl.deleteWebsite(context.Background(), "w"); err != nil {
-		t.Error(err)
+	if warning, err := cl.deleteWebsite(context.Background(), "w"); err != nil || warning != "" {
+		t.Error(warning, err)
 	}
 	if want := []string{"POST /api/websites/w", "DELETE /api/websites/w"}; !slices.Equal(calls, want) {
 		t.Errorf("calls %q", calls)
@@ -1231,5 +1233,40 @@ func TestWindowSiteMenuDeleteFails(t *testing.T) {
 	tt.WaitUntil(5*time.Second, func() bool { return !a.deleting })
 	if a.page != pageManage || a.managed.ID != "a" || !tt.hasText("D1 is down.") {
 		t.Errorf("page %v, texts %q", a.page, tt.Texts())
+	}
+}
+
+func TestDeleteWarnsOfCloudflare(t *testing.T) {
+	f := newFake()
+	f.ownServer = true
+	f.deleteWarning = "Cloudflare refused the server's token: Authentication error."
+	a := testApp(t, f)
+	a.refresh()
+	tt := buildWindow(t, a)
+	tt.WaitUntil(5*time.Second, func() bool { return a.loading == 0 })
+	var shown []string
+	tt.OnAlert = func(c core.AlertConfig) int {
+		shown = append(shown, c.Title+" | "+c.Message)
+		return len(c.Actions) - 1
+	}
+	tt.RightClick("window-site-menu-a")
+	tt.Press("role:menuitem Delete website")
+	tt.WaitUntil(5*time.Second, func() bool { return !a.deleting && a.site("a") == nil })
+	if len(shown) != 2 || !strings.Contains(shown[1], "Acme Docs is deleted, but not all of it on Cloudflare") || !strings.Contains(shown[1], "Authentication error") {
+		t.Errorf("alerts %q", shown)
+	}
+}
+
+func TestClientDeleteWarning(t *testing.T) {
+	body := `{"ok":true,"warning":"routes left"}`
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte(body)) }))
+	defer srv.Close()
+	cl := newClient(srv.URL+"/api", "k")
+	if warning, err := cl.deleteWebsite(context.Background(), "w"); err != nil || warning != "routes left" {
+		t.Errorf("%q, %v", warning, err)
+	}
+	body = ""
+	if warning, err := cl.deleteWebsite(context.Background(), "w"); err != nil || warning != "" {
+		t.Errorf("an empty answer: %q, %v", warning, err)
 	}
 }

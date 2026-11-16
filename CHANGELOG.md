@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Say when deleting a website leaves something of it on Cloudflare, and stop the relay adding its tracker (#19 by @houko).
+
 ## [0.2026.4] - 2026-11-16
 
 Umapp adds the websites of your Cloudflare accounts in one tap, with nothing to embed.

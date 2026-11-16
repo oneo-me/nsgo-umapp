@@ -167,8 +167,8 @@ export async function addCloudflareSite(env: Env, f: typeof fetch, input: string
   return id;
 }
 
-/** removeCloudflareSite takes away the routes the server or the relay has for domain's site, keeping every other Worker's. */
-export async function removeCloudflareSite(env: Env, f: typeof fetch, domain: string): Promise<void> {
+/** removeCloudflareSite takes away the routes the server or the relay has for domain's site, keeping every other Worker's, and in another account uploads the relay again without it, so a route left behind adds no tracker for a website that is gone. origin is the server's own, which the relay keeps sending the account's other sites' events to. */
+export async function removeCloudflareSite(env: Env, f: typeof fetch, domain: string, origin: string): Promise<void> {
   if (!env.CF_API_TOKEN) return;
   const list = await zones(env, f);
   const d = normalizeDomain(domain);
@@ -179,6 +179,11 @@ export async function removeCloudflareSite(env: Env, f: typeof fetch, domain: st
   const { result } = await call<{ id: string; pattern: string; script?: string }[]>(env, f, "GET", `/zones/${zone.id}/workers/routes`);
   for (const r of result ?? []) {
     if (r.script === script && patterns.has(r.pattern.trim().toLowerCase())) await call(env, f, "DELETE", `/zones/${zone.id}/workers/routes/${r.id}`);
+  }
+  if (script === RELAY) {
+    const websites = await websiteDomains(env);
+    websites.delete(d);
+    await uploadRelay(env, f, { zones: list, routes: new Map(), websites }, zone.accountId, origin, new Map());
   }
 }
 

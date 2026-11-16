@@ -98,6 +98,19 @@ func (a *app) saveWebsite() {
 	})
 }
 
+// warnDeleted tells, when there is a warning, what deleting w left on Cloudflare, which still sends its site's requests through a Worker. It shows before the page w was on goes, from the scope that asked to delete it.
+func (a *app) warnDeleted(cx *core.Scope, w website, warning string) {
+	if warning == "" {
+		return
+	}
+	tr := msgsOf(cx)
+	base.ShowAlertDialog(cx, base.AlertDialog{
+		Title:       tr.DeletedWithWarning(w.Name),
+		Description: warning,
+		Actions:     []core.AlertAction{{Label: tr.Ok(), Role: core.AlertCancel}},
+	}, nil)
+}
+
 // confirmDelete asks before deleting the managed website, then deletes it and returns to where its page was opened from, or the list for its own page.
 func (a *app) confirmDelete(cx *core.Scope) {
 	tr := msgsOf(cx)
@@ -111,7 +124,7 @@ func (a *app) confirmDelete(cx *core.Scope) {
 		},
 	}, func(label string) {
 		if label == del {
-			a.deleteWebsite()
+			a.deleteWebsite(cx)
 		}
 	})
 }
@@ -134,12 +147,12 @@ func (a *app) confirmDeleteSite(cx *core.Scope, id string) {
 		},
 	}, func(label string) {
 		if label == del {
-			a.deleteSite(w)
+			a.deleteSite(cx, w)
 		}
 	})
 }
 
-func (a *app) deleteSite(w website) {
+func (a *app) deleteSite(cx *core.Scope, w website) {
 	if a.deleting || a.src == nil {
 		return
 	}
@@ -149,7 +162,7 @@ func (a *app) deleteSite(w website) {
 	a.spawn(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
-		err := src.deleteWebsite(ctx, w.ID)
+		warning, err := src.deleteWebsite(ctx, w.ID)
 		a.post(func() {
 			a.deleting = false
 			if err != nil {
@@ -157,6 +170,7 @@ func (a *app) deleteSite(w website) {
 				a.saveErr = err.Error()
 				return
 			}
+			a.warnDeleted(cx, w, warning)
 			a.sites = slices.DeleteFunc(a.sites, func(s *site) bool { return s.ID == w.ID })
 			if a.open == w.ID || a.page == pageManage && a.managed.ID == w.ID {
 				a.open = ""
@@ -167,7 +181,7 @@ func (a *app) deleteSite(w website) {
 	})
 }
 
-func (a *app) deleteWebsite() {
+func (a *app) deleteWebsite(cx *core.Scope) {
 	if a.deleting || a.src == nil {
 		return
 	}
@@ -177,7 +191,7 @@ func (a *app) deleteWebsite() {
 	a.spawn(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
-		err := src.deleteWebsite(ctx, id)
+		warning, err := src.deleteWebsite(ctx, id)
 		a.post(func() {
 			a.deleting = false
 			if id != a.managed.ID {
@@ -187,6 +201,7 @@ func (a *app) deleteWebsite() {
 				a.saveErr = err.Error()
 				return
 			}
+			a.warnDeleted(cx, a.managed, warning)
 			a.sites = slices.DeleteFunc(a.sites, func(s *site) bool { return s.ID == id })
 			if a.open == id {
 				a.open = ""

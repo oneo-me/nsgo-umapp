@@ -225,13 +225,13 @@ async function updateWebsite(env: Env, id: string, request: Request): Promise<We
   return website(env, id);
 }
 
-async function deleteWebsite(env: Env, id: string, f: typeof fetch) {
+async function deleteWebsite(env: Env, id: string, origin: string, f: typeof fetch) {
   const w = await website(env, id);
   // A website the Worker tracks loses its routes first, so its site no longer passes through the Worker for nothing; a failure there leaves them for the next deploy to take away.
   let warning = "";
   if (w.autoTrack) {
     try {
-      await removeCloudflareSite(env, f, w.domain);
+      await removeCloudflareSite(env, f, w.domain, origin);
     } catch (e) {
       warning = e instanceof Error ? e.message : String(e);
     }
@@ -287,7 +287,7 @@ export async function api(request: Request, env: Env, path: string, now = Date.n
     if (!sub) {
       if (m === "GET") return json(await website(env, id));
       if (m === "POST") return json(await updateWebsite(env, id, request));
-      if (m === "DELETE") return json(await deleteWebsite(env, id, f));
+      if (m === "DELETE") return json(await deleteWebsite(env, id, new URL(request.url).origin, f));
       throw new HTTPError(405, "Method not allowed.");
     }
     if (m !== "GET") throw new HTTPError(405, "Method not allowed.");

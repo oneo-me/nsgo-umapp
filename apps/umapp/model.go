@@ -25,7 +25,8 @@ type source interface {
 	metrics(ctx context.Context, id, kind string, from, to time.Time, limit int, tag string) ([]metric, error)
 	addWebsite(ctx context.Context, name, domain string) (website, error)
 	updateWebsite(ctx context.Context, id, name, domain string) (website, error)
-	deleteWebsite(ctx context.Context, id string) error
+	// deleteWebsite deletes a website, returning a warning when Umapp's server deleted it but left something of it on Cloudflare.
+	deleteWebsite(ctx context.Context, id string) (warning string, err error)
 	// hasDashboard reports whether the server has Umami's interface to open a website in.
 	hasDashboard() bool
 	// cloudflareSites are the websites of the Cloudflare accounts Umapp's server can add with nothing to embed; errNoCloudflare when it has no token for them.

@@ -149,6 +149,29 @@ describe("the Cloudflare accounts' sites", () => {
     expect(cf.routes.get("z1")!.map((r) => r.id)).toEqual(["keep"]);
   });
 
+  it("takes a deleted website of another account out of the relay there, keeping the account's others", async () => {
+    const cf = fakeCloudflare();
+    cf.routes.set("z4", []);
+    const zonesFake = cf.f;
+    const f = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input).includes("/zones?")) {
+        const res = await zonesFake(input, init);
+        const body = (await res.json()) as any;
+        body.result.push({ id: "z4", name: "second.app", status: "active", account: { id: OTHER, name: "Other" } });
+        body.result_info.total_count = body.result.length;
+        return Response.json(body);
+      }
+      return zonesFake(input, init);
+    }) as typeof fetch;
+    const first = await call("POST", "/cloudflare/sites", f, { domain: "other.app" });
+    const second = await call("POST", "/cloudflare/sites", f, { domain: "second.app" });
+    const sites = () => JSON.parse(cf.scripts.get(`${OTHER}/${RELAY}`)!.metadata.bindings.find((b: any) => b.name === "SITES").text);
+    expect(sites()).toEqual({ "other.app": first.body.id, "second.app": second.body.id });
+    expect((await call("DELETE", `/websites/${first.body.id}`, f)).body).toEqual({ ok: true });
+    expect(cf.routes.get("z3")).toEqual([]);
+    expect(sites()).toEqual({ "second.app": second.body.id });
+  });
+
   it("deletes the website even when Cloudflare refuses, saying why", async () => {
     const cf = fakeCloudflare();
     const added = await call("POST", "/cloudflare/sites", cf.f, { domain: "example.com" });

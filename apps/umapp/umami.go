@@ -119,7 +119,8 @@ func (cl *client) call(ctx context.Context, method, path string, q url.Values, i
 		}
 		return e
 	}
-	if out == nil {
+	// A deletion may answer with no body at all, as some Umami servers do.
+	if out == nil || method == http.MethodDelete && len(bytes.TrimSpace(body)) == 0 {
 		return nil
 	}
 	if err := json.Unmarshal(body, out); err != nil {
@@ -200,9 +201,13 @@ func (cl *client) trackSite(ctx context.Context, domain string) (website, error)
 	return w, err
 }
 
-// deleteWebsite deletes website id and its statistics.
-func (cl *client) deleteWebsite(ctx context.Context, id string) error {
-	return cl.call(ctx, http.MethodDelete, "/websites/"+url.PathEscape(id), nil, nil, nil)
+// deleteWebsite deletes website id and its statistics, returning what Umapp's server could not undo on Cloudflare for it, such as routes it failed to remove.
+func (cl *client) deleteWebsite(ctx context.Context, id string) (warning string, err error) {
+	var out struct {
+		Warning string `json:"warning"`
+	}
+	err = cl.call(ctx, http.MethodDelete, "/websites/"+url.PathEscape(id), nil, nil, &out)
+	return out.Warning, err
 }
 
 // num decodes a count however the server writes it: a number, a string (as

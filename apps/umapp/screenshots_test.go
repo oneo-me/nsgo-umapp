@@ -142,8 +142,8 @@ func (demo) trackSite(context.Context, string) (website, error) {
 	return website{}, errors.New("demo")
 }
 
-func (demo) deleteWebsite(context.Context, string) error {
-	return errors.New("the demo deletes no websites")
+func (demo) deleteWebsite(context.Context, string) (string, error) {
+	return "", errors.New("the demo deletes no websites")
 }
 
 // TestScreenshots and the others save the README's and the website's
