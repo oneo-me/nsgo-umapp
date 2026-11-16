@@ -4,6 +4,7 @@
 
 - Add a Window menu to the menu bar while the window can open.
 - Show the panel's list, with its totals, trends and counts, in the window's sidebar, the website chosen there beside it, under the range in a sidebar of fixed width.
+- Show counts of visitors online, on websites, tags, pages and countries, without a dot before them, their color telling whether anyone is.
 - Say when deleting a website leaves something of it on Cloudflare, and stop the relay adding its tracker (#19 by @houko).
 
 ## [0.2026.4] - 2026-11-16

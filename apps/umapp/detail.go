@@ -391,14 +391,11 @@ func breakdown(cx *core.Scope, title, unit, kind string, rows, live []metric, lo
 }
 
 // onlineCount is a count over the range, n, after the visitors on its
-// value now with a dot where there are any, as "● 2/40"; n < 0 is unknown.
+// value now where there are any, as "2/40"; n < 0 is unknown.
 func onlineCount(now int, n num, size core.Points, live, quiet func() core.Color) core.Node {
 	var children []core.Node
 	if now > 0 {
-		children = append(children,
-			core.View{Style: core.Style{Width: core.Pt(5), Height: core.Pt(5), CornerRadius: 2.5, Margin: core.Edges{Right: 4}},
-				StyleFunc: ui.Filled(live)},
-			ui.Tabular(ui.Text(count(float64(now)), size, ui.Medium, live)))
+		children = append(children, ui.Tabular(ui.Text(count(float64(now)), size, ui.Medium, live)))
 	}
 	if n >= 0 {
 		total := count(float64(n))

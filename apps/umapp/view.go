@@ -361,11 +361,9 @@ func (a *app) liveBadge(cx *core.Scope, n int, long bool) core.Node {
 	}
 	tr := msgsOf(cx)
 	colors := ui.ColorsOf(cx)
-	dotColor := colors.Faint
 	textColor := colors.Muted
 	weight := ui.Regular
 	if n > 0 {
-		dotColor = colors.Up
 		textColor = colors.Up
 		weight = ui.Medium
 	}
@@ -373,12 +371,9 @@ func (a *app) liveBadge(cx *core.Scope, n int, long bool) core.Node {
 	if long {
 		label = tr.Online(n)
 	}
-	return core.View{Style: core.Style{Direction: core.Row, AlignItems: core.AlignCenter, Gap: 5},
-		Label: tr.LiveTooltip(n, a.unitWord(n, tr.Visitor(), tr.VisitorsUnit())),
-		Children: []core.Node{
-			core.View{Style: core.Style{Width: core.Pt(6), Height: core.Pt(6), CornerRadius: 3}, StyleFunc: ui.Filled(dotColor)},
-			ui.Tabular(ui.Text(label, 11, weight, textColor)),
-		}}
+	return core.View{Style: core.Style{Direction: core.Row, AlignItems: core.AlignCenter},
+		Label:    tr.LiveTooltip(n, a.unitWord(n, tr.Visitor(), tr.VisitorsUnit())),
+		Children: []core.Node{ui.Tabular(ui.Text(label, 11, weight, textColor))}}
 }
 
 func (a *app) delta(cx *core.Scope, cur, prev float64, worse bool) core.Node {
