@@ -5,10 +5,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/nsgo-dev/nsgo"
@@ -24,26 +21,19 @@ type shell struct {
 	a     *app
 	tray  *desktop.Tray
 	panel *desktop.Window
-
-	saving   sync.Mutex
-	savedKey string
 }
 
 func main() {
-	base, err := os.UserConfigDir()
+	s := &shell{}
+	nsgo.Run(s.ready, nsgo.HideDock(), nsgo.WindowSize(panelWidth, panelHeight))
+}
+
+func (s *shell) ready(cx *core.Scope) {
+	p, err := openPrefs(cx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dir := filepath.Join(base, "umapp")
-	s := &shell{}
-	nsgo.Run(func(cx *core.Scope) {
-		s.ready(cx, dir)
-	}, nsgo.HideDock(), nsgo.WindowSize(panelWidth, panelHeight))
-}
-
-func (s *shell) ready(cx *core.Scope, dir string) {
-	cfg := loadConfig(dir)
-	s.savedKey = cfg.Key
+	cfg := p.load()
 	var src source
 	if cfg.Key != "" {
 		src = newClient(cfg.Endpoint, cfg.Key)
@@ -54,7 +44,7 @@ func (s *shell) ready(cx *core.Scope, dir string) {
 	a.onLive = func(n int) { s.updateTray() }
 	a.changed = func(cfg config) {
 		s.updateTray()
-		go s.save(dir, cfg)
+		p.save(cfg)
 	}
 	cx.SetLocale(cfg.Language)
 	a.attach(cx)
@@ -189,23 +179,6 @@ func (s *shell) updateTray() {
 	}
 	s.tray.SetTitle(title)
 	s.tray.SetTooltip(tip)
-}
-
-func (s *shell) save(dir string, cfg config) {
-	s.saving.Lock()
-	defer s.saving.Unlock()
-	if cfg.Key == s.savedKey && runtime.GOOS == "darwin" {
-		cfg.Key = ""
-		if err := writeConfig(dir, cfg); err != nil {
-			log.Print("config: ", err)
-		}
-		return
-	}
-	if err := saveConfig(dir, cfg); err != nil {
-		log.Print("config: ", err)
-		return
-	}
-	s.savedKey = cfg.Key
 }
 
 func (s *shell) tick() {

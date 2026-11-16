@@ -58,7 +58,7 @@ func (cl *client) get(ctx context.Context, path string, q url.Values, out any) e
 	if len(q) > 0 {
 		u += "?" + q.Encode()
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	req, err := apiRequest(ctx, u)
 	if err != nil {
 		return err
 	}

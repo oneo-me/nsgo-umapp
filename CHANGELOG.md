@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Run in a browser, deployed to Cloudflare Workers.
+
 ## [0.2026.1] - 2026-11-16
 
 Umapp is a native menu bar app for macOS, and an iPhone app, that shows the websites of an Umami account and who is visiting them right now.

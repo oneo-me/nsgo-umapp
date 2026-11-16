@@ -41,6 +41,7 @@
 - Show English or Simplified Chinese, following the system unless you choose one.
 - Update on its own on macOS, or from *Check for Updates…* in the right-click menu and settings.
 - Run on iPhone, the panel filling the screen.
+- Run in a browser from a Cloudflare Worker.
 
 ## Install
 
@@ -59,7 +60,7 @@ Or download the disk image from [Releases](https://github.com/oneo-me/nsgo-umapp
 3. Browse the websites, change the range, or open one for its breakdown.
 4. Right-click the icon to quit.
 
-On iPhone, the app opens straight to the panel. The key is kept in the login keychain on macOS, and in the app's own storage on iPhone.
+On iPhone and in a browser, the app opens straight to the panel. The key is kept in the login keychain on macOS, in the app's own storage on iPhone, and in the site's local storage in a browser.
 
 ## Development
 
@@ -77,6 +78,18 @@ GOWORK=off go test ./...
 `go tool nsgo test -target macos -run TestScreenshots` and `-target ios_simulator` save the screenshots, with made-up data, under `.nsgo/test/screenshots/`.
 
 To release, set `apps/umapp/nsgo.yaml`'s version and turn `CHANGELOG.md`'s `## [Unreleased]` into that version on `main`, then push the tag `vX.Y.Z`. The [release workflow](.github/workflows/release.yml) builds the macOS app, signs it for updates with the `NSGO_UPDATES_KEY` secret and publishes a GitHub release with that version's notes.
+
+### Cloudflare Workers
+
+`apps/umapp/wrangler.jsonc` builds the web target and serves it from a Worker, which forwards the app's requests to Umami. It reaches Umami Cloud; add a server of your own to `UMAMI_ENDPOINTS`, as `https://stats.example.com/api`. With [Wrangler](https://developers.cloudflare.com/workers/wrangler/) signed in:
+
+```sh
+cd apps/umapp
+wrangler dev
+wrangler deploy
+```
+
+Anyone who can open the site can use it with their own key. Put [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/) in front to keep it to yourself.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the layout and [AGENTS.md](AGENTS.md) for the working rules.
 

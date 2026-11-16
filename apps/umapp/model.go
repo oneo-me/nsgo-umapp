@@ -105,9 +105,11 @@ func parseTime(s string, loc *time.Location) (time.Time, bool) {
 	return time.Time{}, false
 }
 
-// localZone is the IANA name of the local time zone, which Umami groups
-// series in.
+// localZone is the IANA name of the local time zone, which Umami groups series in.
 func localZone() string {
+	if tz := browserZone(); tz != "" {
+		return tz
+	}
 	if tz := os.Getenv("TZ"); tz != "" {
 		return tz
 	}

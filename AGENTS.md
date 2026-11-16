@@ -10,8 +10,8 @@ Umapp is a native menu bar app, and an iPhone app, that shows the websites of an
 - Use NSGo's `ui` components and its default theme; build reusable UI in NSGo rather than here.
 - Pad every side of a bar, page or row alike: `gutter` for bars and pages, `inset` for rows.
 - Run Umami requests off the UI thread. Apply results on the main thread and never start that work inside a builder.
-- Target macOS on Apple silicon (`macos_arm64`) and iOS (`ios`); test iOS on the iPhone 18 Pro simulator.
-- Keep the API key in the macOS keychain; on iOS it stays in the app's sandboxed config file.
+- Target macOS on Apple silicon (`macos_arm64`), iOS (`ios`) and the web (`web`, deployed to Cloudflare Workers); test iOS on the iPhone 18 Pro simulator.
+- Keep the API key in the macOS keychain; on iOS it stays in the app's sandboxed config file, and on the web in the site's local storage.
 
 ## Working with the user
 

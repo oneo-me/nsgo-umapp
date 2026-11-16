@@ -1,0 +1,9 @@
+{
+  "name": "umapp",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-10-01",
+  "build": { "command": "sh cloudflare/build.sh" },
+  "assets": { "directory": "dist/web", "not_found_handling": "none" },
+  // The Umami APIs the site reaches, comma-separated: add a server of your own's, as https://stats.example.com/api.
+  "vars": { "UMAMI_ENDPOINTS": "https://api.umami.is/v1" }
+}

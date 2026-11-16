@@ -41,6 +41,7 @@
 - 显示英文或简体中文，默认跟随系统，也可以手动选择。
 - 在 macOS 上自动更新，也可以在右键菜单和设置中“检查更新…”。
 - 在 iPhone 上运行，面板铺满屏幕。
+- 通过 Cloudflare Worker 在浏览器中运行。
 
 ## 安装
 
@@ -59,7 +60,7 @@ curl -fsSL https://github.com/oneo-me/nsgo-umapp/releases/latest/download/instal
 3. 浏览网站、切换时间范围，或打开某个网站查看明细。
 4. 右键点击图标可以退出。
 
-在 iPhone 上，应用直接打开面板。密钥在 macOS 上保存在登录钥匙串中，在 iPhone 上保存在应用自己的存储中。
+在 iPhone 和浏览器中，应用直接打开面板。密钥在 macOS 上保存在登录钥匙串中，在 iPhone 上保存在应用自己的存储中，在浏览器中保存在该站点的本地存储中。
 
 ## 开发
 
@@ -77,6 +78,18 @@ GOWORK=off go test ./...
 `go tool nsgo test -target macos -run TestScreenshots` 和 `-target ios_simulator` 会用虚构的数据把截图保存到 `.nsgo/test/screenshots/`。
 
 发布时，在 `main` 上把 `apps/umapp/nsgo.yaml` 的版本和 `CHANGELOG.md` 的 `## [Unreleased]` 改为新版本，再推送标签 `vX.Y.Z`。[发布工作流](.github/workflows/release.yml)会构建 macOS 应用，用 `NSGO_UPDATES_KEY` 密钥为自动更新签名，并以该版本的更新记录发布 GitHub Release。
+
+### Cloudflare Workers
+
+`apps/umapp/wrangler.jsonc` 会构建 web 目标并用一个 Worker 提供服务，由它把应用的请求转发给 Umami。默认只连 Umami Cloud；要连自建服务器，把它加到 `UMAMI_ENDPOINTS`，例如 `https://stats.example.com/api`。登录 [Wrangler](https://developers.cloudflare.com/workers/wrangler/) 后：
+
+```sh
+cd apps/umapp
+wrangler dev
+wrangler deploy
+```
+
+能打开该站点的任何人都可以用自己的密钥使用它。要只供自己使用，请在前面加上 [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/)。
 
 布局见 [ARCHITECTURE.md](ARCHITECTURE.md)，协作规则见 [AGENTS.md](AGENTS.md)。
 
