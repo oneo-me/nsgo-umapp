@@ -241,15 +241,16 @@ func (a *app) siteList(cx *core.Scope) core.Node {
 	vis := a.ordered()
 	children := make([]core.Node, 0, len(vis)+2)
 	children = append(children, a.summary(cx), a.listHeading(cx))
-	for i, s := range vis {
-		children = append(children, a.siteRow(cx, s, i))
+	for _, s := range vis {
+		children = append(children, a.siteRow(cx, s, s.ID, nil))
 	}
 	return ui.ScrollView{Style: ui.FillRest, TestID: "sites", EdgeColor: edgeColor(cx),
 		ContentStyle: core.Style{Padding: core.All(gutter - inset)},
 		Children:     children}
 }
 
-func (a *app) siteRow(cx *core.Scope, s *site, _ int) core.Node {
+// siteRow is a website's row of the list, named testID; selected, when set, marks the one whose page is open.
+func (a *app) siteRow(cx *core.Scope, s *site, testID string, selected func() bool) base.Button {
 	colors := ui.ColorsOf(cx)
 	id := s.ID
 	name := s.Name
@@ -273,14 +274,16 @@ func (a *app) siteRow(cx *core.Scope, s *site, _ int) core.Node {
 		FlexGrow: 1, FlexShrink: 1, MinWidth: core.Pt(0)},
 		Children: []core.Node{favicon(cx, s.Domain, 20), left}}
 	return base.Button{
-		Label: name, TestID: id,
+		Label: name, TestID: testID, Selected: selected,
 		OnPress: func(core.PressEvent) { a.openSite(id) },
 		Style: core.Style{Direction: core.Row, AlignItems: core.AlignCenter, Gap: 12,
 			Padding: core.All(inset), CornerRadius: 8, Width: core.Pct(100)},
 		StyleFunc: func() core.Style {
 			return core.Style{
-				Hover:  &core.Style{Background: colors.Hover()},
-				Active: &core.Style{Background: colors.Pressed()},
+				Hover:        &core.Style{Background: colors.Hover()},
+				Active:       &core.Style{Background: colors.Pressed()},
+				Selected:     &core.Style{Background: ui.Alpha(colors.Text(), 0.1)},
+				FocusVisible: ui.FocusRing(cx, -2),
 			}
 		},
 		Children: []core.Node{lead, spark, right},

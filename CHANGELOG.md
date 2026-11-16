@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Show the panel's list, with its totals, trends and counts, in the window's sidebar, the website chosen there beside it.
 - Say when deleting a website leaves something of it on Cloudflare, and stop the relay adding its tracker (#19 by @houko).
 
 ## [0.2026.4] - 2026-11-16

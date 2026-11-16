@@ -169,7 +169,7 @@ const (
 	textFromLink
 	textFromLinkHint
 	textOpenWindow
-	textOverview
+	textChooseWebsite
 	textToggleSidebar
 	textResizeSidebar
 	numTexts
@@ -276,7 +276,7 @@ var keyOfText = [numTexts]string{
 	"fromLink",
 	"fromLinkHint",
 	"openWindow",
-	"overview",
+	"chooseWebsite",
 	"toggleSidebar",
 	"resizeSidebar",
 }
@@ -381,7 +381,7 @@ var textsEn = i18n.NewTexts(""+
 	"Filled in from a link"+
 	"Check that the endpoint is your server, then connect."+
 	"Open Window"+
-	"Overview"+
+	"Choose a website to see its visitors."+
 	"Show or Hide the Sidebar"+
 	"Resize the Sidebar",
 	[]uint16{
@@ -483,7 +483,7 @@ var textsEn = i18n.NewTexts(""+
 		21,
 		53,
 		11,
-		8,
+		37,
 		24,
 		18,
 	})
@@ -588,7 +588,7 @@ var textsZhHans = i18n.NewTexts(""+
 	"已从链接填入"+
 	"确认地址是你自己的服务器后再连接。"+
 	"打开窗口"+
-	"概览"+
+	"选择一个网站，查看它的访客。"+
 	"显示或隐藏边栏"+
 	"调整边栏宽度",
 	[]uint16{
@@ -690,7 +690,7 @@ var textsZhHans = i18n.NewTexts(""+
 		18,
 		51,
 		12,
-		6,
+		42,
 		21,
 		18,
 	})
@@ -1627,12 +1627,12 @@ func OpenWindow(cx *core.Scope) string { return For(cx).OpenWindow() }
 // OpenWindow is the package's OpenWindow in the language of msgs.
 func (msgs Messages) OpenWindow() string { return msgs.text(textOpenWindow) }
 
-// Overview says "Overview"
+// ChooseWebsite says "Choose a website to see its visitors."
 // in the language the app shows under cx.
-func Overview(cx *core.Scope) string { return For(cx).Overview() }
+func ChooseWebsite(cx *core.Scope) string { return For(cx).ChooseWebsite() }
 
-// Overview is the package's Overview in the language of msgs.
-func (msgs Messages) Overview() string { return msgs.text(textOverview) }
+// ChooseWebsite is the package's ChooseWebsite in the language of msgs.
+func (msgs Messages) ChooseWebsite() string { return msgs.text(textChooseWebsite) }
 
 // ToggleSidebar says "Show or Hide the Sidebar"
 // in the language the app shows under cx.

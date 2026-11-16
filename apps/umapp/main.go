@@ -185,7 +185,7 @@ func (s *shell) openWindow(cx *core.Scope) {
 	}
 	s.window = desktop.OpenWindow(cx, desktop.WindowOptions{Title: s.a.msgs().AppName(), Key: "main",
 		Width: windowWidth, Height: windowHeight,
-		Constraints: desktop.WindowConstraints{MinWidth: 720, MinHeight: 480}}, s.a.windowRoot)
+		Constraints: desktop.WindowConstraints{MinWidth: 860, MinHeight: 480}}, s.a.windowRoot)
 	if s.window == nil {
 		return
 	}

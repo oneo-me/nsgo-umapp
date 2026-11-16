@@ -27,7 +27,7 @@ Umapp is a native macOS menu bar application, built for Apple silicon, an iPhone
 | `apps/server/scripts/deploy.mjs` | `npm run deploy`: the account, the D1 database and its migrations, the Worker with an API key the first time and a Cloudflare token once, the account's sites to track, and Umapp on this Mac. |
 | `apps/server/scripts/sites.mjs` | What `deploy.mjs` decides without I/O: zones, routes, the sites chosen, and the routes and websites that changes. |
 | `apps/umapp/view.go` | List, header, summary and sparklines; the shortcuts the panel and the window share. |
-| `apps/umapp/window.go` | The main window: the websites in a sidebar beside the page the panel shows, wide. |
+| `apps/umapp/window.go` | The main window: the panel's list in a sidebar beside the page of the website chosen there, wide. |
 | `apps/umapp/detail.go` | One website's tag filter, metrics, chart and breakdowns, with favicons and flags. |
 | `apps/umapp/settings.go` | Connect and menu bar options. |
 | `apps/umapp/add.go` | Adding a website. |
@@ -43,7 +43,7 @@ Umapp is a native macOS menu bar application, built for Apple silicon, an iPhone
 
 - Run network work off the UI thread. Apply results on the main thread and never start that work inside a builder.
 - Views follow the state through a revision: actions change plain data and call `invalidate`, and a region builds again only when its key changes.
-- Present Umapp as a menu bar app: the tray icon opens the panel on a left click and offers the window and Quit on a right click. The window opens from there, the panel's bar, ⌘0 or a second launch; the app shows in the Dock only while it is open. It follows the same state as the panel, so it shows the same page with a sidebar of the websites, and the panel's pages without their bars, forms centered. Where panels are not available, as on iOS and the web, the panel's content is the main view inside the safe area, without the menu bar's options (`noTray`).
+- Present Umapp as a menu bar app: the tray icon opens the panel on a left click and offers the window and Quit on a right click. The window opens from there, the panel's bar, ⌘0 or a second launch; the app shows in the Dock only while it is open. It follows the same state as the panel, so it shows the panel's list in a sidebar, the website chosen there beside it, and the panel's other pages without their bars, forms centered. Where panels are not available, as on iOS and the web, the panel's content is the main view inside the safe area, without the menu bar's options (`noTray`).
 - Keep the API key in the macOS keychain. On iOS, which has no `security` command, it stays in the config file inside the app's sandbox. In a browser it stays in the site's local storage, as NSGo keeps the app's storage there.
 
 ## Core flows

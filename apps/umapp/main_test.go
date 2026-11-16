@@ -1034,7 +1034,8 @@ func TestWindowShowsWebsitesBesideTheirPages(t *testing.T) {
 	a := testApp(t, newFake())
 	a.refresh()
 	tt := buildWindow(t, a)
-	for _, s := range []string{"Overview", "Acme Docs", "Landing page", "Visitors / Views"} {
+	tt.WaitUntil(5*time.Second, func() bool { return a.loading == 0 })
+	for _, s := range []string{"Acme Docs", "docs.acme.dev", "Visitors / Views", "Choose a website to see its visitors."} {
 		if !tt.hasText(s) {
 			t.Errorf("no %q in %q", s, tt.Texts())
 		}
@@ -1051,9 +1052,9 @@ func TestWindowShowsWebsitesBesideTheirPages(t *testing.T) {
 	if a.page != pageManage || a.managed.ID != "b" || len(tt.Query("manage")) == 0 {
 		t.Errorf("manage: page %v, managed %+v", a.page, a.managed)
 	}
-	tt.Press("window-overview")
-	if a.page != pageSites || len(tt.Query("sites")) == 0 {
-		t.Errorf("overview: page %v", a.page)
+	tt.Press("window-site-a")
+	if a.page != pageSite || a.open != "a" || len(tt.Query("detail-a")) == 0 {
+		t.Errorf("another website: page %v, open %q", a.page, a.open)
 	}
 	tt.Press("window-settings")
 	if a.page != pageSettings || len(tt.Query("settings")) == 0 {
@@ -1071,7 +1072,7 @@ func TestWindowBeforeConnectingShowsTheConnectForm(t *testing.T) {
 	if len(tt.Query("key")) == 0 || !tt.hasText("Connect to Umami") {
 		t.Errorf("texts %q", tt.Texts())
 	}
-	if tt.hasText("Overview") {
+	if tt.hasText("Visitors / Views") {
 		t.Error("the sidebar lists websites before connecting")
 	}
 }

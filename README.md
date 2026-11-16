@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/macos-window-en-dark.png"><img src="screenshots/macos-window-en.png" alt="Umapp's window on macOS: the websites in a sidebar beside one's page" width="736"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/macos-window-en-dark.png"><img src="screenshots/macos-window-en.png" alt="Umapp's window on macOS: the panel's list in a sidebar beside a website's page" width="736"></picture>
 </p>
 
 <p align="center">
@@ -38,7 +38,7 @@
 ## Features
 
 - Open a panel from the menu bar with every website the API key can see, and how many people are on them now.
-- Open a window on macOS with the websites in a sidebar beside each one's page, laid out wide.
+- Open a window on macOS with the panel's list in a sidebar beside the page of the website you choose, laid out wide.
 - Show visitors / views and a sparkline for 24 hours, 7 days, 30 days or 90 days, compared with the range before.
 - Open one website for bounce rate, duration, a chart with counts under the pointer, and the top pages, referrers and countries with their icons and flags, all of them or of one tag.
 - Connect to Umami Cloud, a self-hosted Umami or Umapp's own server, and sort the websites, each with its icon and domain, by visitors, views or name.

@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/macos-window-zh-Hans-dark.png"><img src="screenshots/macos-window-zh-Hans.png" alt="Umapp 在 macOS 上的窗口：侧边栏列出网站，旁边是网站页面" width="736"></picture>
+  <picture><source media="(prefers-color-scheme: dark)" srcset="screenshots/macos-window-zh-Hans-dark.png"><img src="screenshots/macos-window-zh-Hans.png" alt="Umapp 在 macOS 上的窗口：侧边栏是面板的网站列表，旁边是网站页面" width="736"></picture>
 </p>
 
 <p align="center">
@@ -38,7 +38,7 @@
 ## 功能
 
 - 从菜单栏打开面板，查看该 API 密钥能看到的每个网站，以及当前有多少人在浏览。
-- 在 macOS 上打开窗口：左侧边栏列出网站，右侧以宽布局显示每个网站的页面。
+- 在 macOS 上打开窗口：左侧边栏显示与面板相同的网站列表，右侧以宽布局显示所选网站的页面。
 - 按 24 小时、7 天、30 天或 90 天显示访客/浏览和趋势，并与上一段对比。
 - 打开单个网站，查看跳出率、访问时长、指针悬停显示数量的图表，以及带图标和国旗的热门页面、来源和国家/地区，可看全部或只看某个标签。
 - 连接 Umami Cloud、自建 Umami，或 Umapp 自有服务端，并按访客、浏览或名称为网站排序，每个网站都附上图标和域名。

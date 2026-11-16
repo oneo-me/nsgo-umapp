@@ -10,14 +10,14 @@ import (
 	"github.com/nsgo-dev/nsgo/ui"
 )
 
-// The main window's size as it first opens, and its sidebar's.
+// The main window's size as it first opens, and its sidebar's, which shows the panel's list at the panel's width.
 const (
-	windowWidth  = 1080
-	windowHeight = 720
-	sidebarWidth = 260
+	windowWidth  = 1200
+	windowHeight = 760
+	sidebarWidth = panelWidth
 )
 
-// windowRoot is the main window: the websites in a sidebar beside the page the panel shows, wider. Both follow the same state, so a website chosen here is the panel's too.
+// windowRoot is the main window: the panel's list in a sidebar beside the page of the website chosen there, wider. Both follow the same state, so a website chosen here is the panel's too.
 func (a *app) windowRoot(cx *core.Scope) core.Node {
 	base.SetScrollbarTheme(cx, ui.ScrollbarTheme(cx))
 	a.bindKeys(cx)
@@ -26,7 +26,7 @@ func (a *app) windowRoot(cx *core.Scope) core.Node {
 	width := core.NewSignal(cx, core.Points(sidebarWidth))
 	return ui.SidebarShell{TestID: "window",
 		Open: open.Get, OnOpenChange: open.Set, ToggleLabel: tr.ToggleSidebar(),
-		Width: width.Get, OnWidthChange: width.Set, DefaultWidth: sidebarWidth, MinWidth: 200, MaxWidth: 420,
+		Width: width.Get, OnWidthChange: width.Set, DefaultWidth: sidebarWidth, MinWidth: 300, MaxWidth: 480,
 		ResizeLabel: tr.ResizeSidebar(),
 		Sidebar:     []core.Node{a.region(a.sidebarKey, a.windowSidebar)},
 		SidebarFooter: []core.Node{
@@ -40,45 +40,35 @@ func (a *app) windowRoot(cx *core.Scope) core.Node {
 	}
 }
 
-// sidebarKey changes as what the sidebar shows does: the page, the website open, and each website's name and visitors online.
+// sidebarKey changes as what the sidebar shows does: the list as the panel shows it, the website open, and each website's name and domain.
 func (a *app) sidebarKey() string {
 	var b strings.Builder
-	fmt.Fprint(&b, a.page, a.open, a.cfg.Sort, a.configured(), ";")
+	fmt.Fprint(&b, a.page, a.open, a.configured(), a.listContentKey(), ";")
 	for _, s := range a.ordered() {
-		fmt.Fprintf(&b, "%s:%s:%s:%d;", s.ID, s.Name, s.Domain, s.active)
+		fmt.Fprintf(&b, "%s:%s:%s;", s.ID, s.Name, s.Domain)
 	}
 	return b.String()
 }
 
-// windowSidebar is the overview, then every website in the list's order, the one open selected.
+// windowSidebar is the panel's list: the totals, then every website with its trend and counts, the one open selected.
 func (a *app) windowSidebar(cx *core.Scope) core.Node {
-	tr := msgsOf(cx)
 	if !a.configured() {
 		return core.View{}
 	}
-	rows := []core.Node{ui.SidebarButton{Text: tr.Overview(), Icon: lucide.LayoutDashboard, TestID: "window-overview",
-		Selected: func() bool { return a.page == pageSites }, OnPress: a.showOverview}}
+	if len(a.sites) == 0 {
+		return core.View{Style: core.Style{FlexGrow: 1, Padding: core.Symmetric(0, gutter-inset)}, Children: []core.Node{a.list(cx)}}
+	}
+	rows := []core.Node{a.summary(cx), a.listHeading(cx)}
 	for _, s := range a.ordered() {
 		rows = append(rows, a.sidebarSite(cx, s))
 	}
-	return core.View{Style: core.Style{Gap: 1, Padding: core.Symmetric(0, inset)}, Children: rows}
+	return core.View{Style: core.Style{Gap: 1, Padding: core.Symmetric(0, gutter-inset)}, Children: rows}
 }
 
 func (a *app) sidebarSite(cx *core.Scope, s *site) core.Node {
-	colors := ui.ColorsOf(cx)
 	id := s.ID
-	name := oneLine(ui.Text(s.Name, 13, ui.Regular, colors.Text))
-	name.Style = name.Style.Merge(core.Style{FlexGrow: 1})
-	row := base.Button{Label: s.Name, TestID: "window-site-" + id,
-		Selected: func() bool { return a.page == pageSite && a.open == id },
-		OnPress:  func(core.PressEvent) { a.openSite(id) },
-		Style: core.Style{Direction: core.Row, AlignItems: core.AlignCenter, Gap: 8, MinHeight: core.Pt(32), MinWidth: core.Pt(0),
-			FlexShrink: 0, Padding: core.Symmetric(0, 8), CornerRadius: 8, Cursor: core.CursorDefault},
-		StyleFunc: func() core.Style {
-			return core.Style{Selected: &core.Style{Background: ui.Alpha(colors.Text(), 0.1)}, FocusVisible: ui.FocusRing(cx, -2)}
-		},
-		Children: []core.Node{favicon(cx, s.Domain, 16), name, a.liveBadge(cx, s.active, false)},
-	}
+	row := a.siteRow(cx, s, "window-site-"+id, func() bool { return a.page == pageSite && a.open == id })
+	row.Style = row.Style.Merge(core.Style{FlexShrink: 0, MinWidth: core.Pt(0), Cursor: core.CursorDefault})
 	return ui.ContextMenu{Trigger: row, Children: a.siteMenu(cx, s), TestID: "window-site-menu-" + id}
 }
 
@@ -100,7 +90,7 @@ func (a *app) siteMenu(cx *core.Scope, s *site) []core.Node {
 			Disabled: live(a, func() bool { return a.deleting }), OnSelect: func() { a.confirmDeleteSite(cx, id) }})
 }
 
-// showOverview shows every website, as the panel's list does.
+// showOverview shows the list alone: the panel's, and in the window the sidebar beside no website's page.
 func (a *app) showOverview() {
 	if a.page == pageSettings {
 		a.resetSettings()
@@ -113,7 +103,7 @@ func (a *app) showOverview() {
 func (a *app) windowTitle(cx *core.Scope) core.Node {
 	tr := msgsOf(cx)
 	colors := ui.ColorsOf(cx)
-	title := tr.Overview()
+	title := tr.Websites()
 	switch {
 	case !a.configured():
 		title = tr.ConnectTitle()
@@ -165,7 +155,19 @@ func (a *app) windowContent(cx *core.Scope) core.Node {
 	case a.page == pageSite && a.site(a.open) != nil:
 		return a.region(a.detailKey, func(cx *core.Scope) core.Node { return a.detailView(cx, a.site(a.open), true) })
 	}
-	return a.region(a.listContentKey, a.list)
+	return a.chooseWebsite(cx)
+}
+
+// chooseWebsite fills the window's page while no website's is open.
+func (a *app) chooseWebsite(cx *core.Scope) core.Node {
+	colors := ui.ColorsOf(cx)
+	return core.View{Style: core.Style{FlexGrow: 1, AlignItems: core.AlignCenter, JustifyContent: core.JustifyCenter, Gap: 10, Padding: core.All(24)},
+		TestID: "choose-website",
+		Children: []core.Node{
+			ui.Icon(lucide.MousePointerClick, 28, colors.Faint),
+			core.Text{Content: msgsOf(cx).ChooseWebsite(), Style: core.Style{FontSize: 13, TextAlign: core.TextAlignCenter},
+				StyleFunc: ui.Colored(colors.Muted)},
+		}}
 }
 
 // formMaxWidth keeps a form's labels near their values in a wide window.
