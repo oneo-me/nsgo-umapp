@@ -104,14 +104,23 @@ func (s *shell) installMenu(cx *core.Scope) {
 		app = append(app, desktop.MenuItem{Label: tr.CheckForUpdates(), OnSelect: s.a.checkUpdates})
 	}
 	app = append(app, desktop.MenuItem{Separator: true}, desktop.MenuItem{Role: desktop.MenuQuit})
-	desktop.SetApplicationMenu(cx, []desktop.MenuItem{
+	bar := []desktop.MenuItem{
 		{Label: tr.AppName(), Items: app},
 		{Label: menus.For(cx).Edit(), Items: []desktop.MenuItem{
 			{Role: desktop.MenuUndo}, {Role: desktop.MenuRedo},
 			{Separator: true},
 			{Role: desktop.MenuCut}, {Role: desktop.MenuCopy}, {Role: desktop.MenuPaste}, {Role: desktop.MenuSelectAll},
 		}},
-	})
+	}
+	if s.a.openWindow != nil {
+		// The main window's own menu, as macOS apps have one.
+		bar = append(bar, desktop.MenuItem{Label: menus.For(cx).Window(), Items: []desktop.MenuItem{
+			{Role: desktop.MenuMinimize}, {Role: desktop.MenuZoom}, {Role: desktop.MenuToggleFullScreen},
+			{Separator: true},
+			{Role: desktop.MenuClose},
+		}})
+	}
+	desktop.SetApplicationMenu(cx, bar)
 }
 
 func (s *shell) createTray(cx *core.Scope) {

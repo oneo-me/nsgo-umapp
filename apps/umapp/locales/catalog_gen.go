@@ -171,7 +171,6 @@ const (
 	textOpenWindow
 	textChooseWebsite
 	textToggleSidebar
-	textResizeSidebar
 	numTexts
 )
 
@@ -278,7 +277,6 @@ var keyOfText = [numTexts]string{
 	"openWindow",
 	"chooseWebsite",
 	"toggleSidebar",
-	"resizeSidebar",
 }
 
 // textsEn are the messages without arguments in en.
@@ -382,8 +380,7 @@ var textsEn = i18n.NewTexts(""+
 	"Check that the endpoint is your server, then connect."+
 	"Open Window"+
 	"Choose a website to see its visitors."+
-	"Show or Hide the Sidebar"+
-	"Resize the Sidebar",
+	"Show or Hide the Sidebar",
 	[]uint16{
 		5,
 		5,
@@ -485,7 +482,6 @@ var textsEn = i18n.NewTexts(""+
 		11,
 		37,
 		24,
-		18,
 	})
 
 // textsZhHans are the messages without arguments in zh-Hans.
@@ -589,8 +585,7 @@ var textsZhHans = i18n.NewTexts(""+
 	"确认地址是你自己的服务器后再连接。"+
 	"打开窗口"+
 	"选择一个网站，查看它的访客。"+
-	"显示或隐藏边栏"+
-	"调整边栏宽度",
+	"显示或隐藏边栏",
 	[]uint16{
 		5,
 		5,
@@ -692,7 +687,6 @@ var textsZhHans = i18n.NewTexts(""+
 		12,
 		42,
 		21,
-		18,
 	})
 
 // texts returns the messages without arguments in lang, nil for a
@@ -1640,10 +1634,3 @@ func ToggleSidebar(cx *core.Scope) string { return For(cx).ToggleSidebar() }
 
 // ToggleSidebar is the package's ToggleSidebar in the language of msgs.
 func (msgs Messages) ToggleSidebar() string { return msgs.text(textToggleSidebar) }
-
-// ResizeSidebar says "Resize the Sidebar"
-// in the language the app shows under cx.
-func ResizeSidebar(cx *core.Scope) string { return For(cx).ResizeSidebar() }
-
-// ResizeSidebar is the package's ResizeSidebar in the language of msgs.
-func (msgs Messages) ResizeSidebar() string { return msgs.text(textResizeSidebar) }

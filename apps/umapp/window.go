@@ -10,7 +10,7 @@ import (
 	"github.com/nsgo-dev/nsgo/ui"
 )
 
-// The main window's size as it first opens, and its sidebar's, which shows the panel's list at the panel's width.
+// The main window's size as it first opens, and its sidebar's, which shows the panel's list at the panel's fixed width.
 const (
 	windowWidth  = 1200
 	windowHeight = 760
@@ -23,12 +23,11 @@ func (a *app) windowRoot(cx *core.Scope) core.Node {
 	a.bindKeys(cx)
 	tr := msgsOf(cx)
 	open := core.NewSignal(cx, true)
-	width := core.NewSignal(cx, core.Points(sidebarWidth))
 	return ui.SidebarShell{TestID: "window",
 		Open: open.Get, OnOpenChange: open.Set, ToggleLabel: tr.ToggleSidebar(),
-		Width: width.Get, OnWidthChange: width.Set, DefaultWidth: sidebarWidth, MinWidth: 300, MaxWidth: 480,
-		ResizeLabel: tr.ResizeSidebar(),
-		Sidebar:     []core.Node{a.region(a.sidebarKey, a.windowSidebar)},
+		DefaultWidth: sidebarWidth, MinWidth: sidebarWidth, Fixed: true,
+		SidebarActions: []core.Node{a.region(a.windowRangeKey, a.windowRange)},
+		Sidebar:        []core.Node{a.region(a.sidebarKey, a.windowSidebar)},
 		SidebarFooter: []core.Node{
 			a.toolButton(cx, lucide.Plus, tr.AddWebsite(), live(a, func() bool { return !a.configured() }), a.startAdd, "window-add"),
 			ui.Spacer{},
@@ -121,17 +120,27 @@ func (a *app) windowTitle(cx *core.Scope) core.Node {
 	return text
 }
 
-func (a *app) windowActionsKey() string {
-	return fmt.Sprint(a.pageKey(), a.cfg.Range, a.src != nil && a.src.hasDashboard())
+func (a *app) windowRangeKey() string { return fmt.Sprint(a.configured()) }
+
+// windowRange is the range the sidebar's list and the website's page show, at the end of the sidebar's bar.
+func (a *app) windowRange(cx *core.Scope) core.Node {
+	if !a.configured() {
+		return core.View{}
+	}
+	return row(0, a.rangeControl(cx))
 }
 
-// windowActions are the content's tools: the range and refresh for the lists and charts, and a website's settings and Umami page on its own.
+func (a *app) windowActionsKey() string {
+	return fmt.Sprint(a.pageKey(), a.src != nil && a.src.hasDashboard())
+}
+
+// windowActions are the content's tools: refresh for the lists and charts, and a website's settings and Umami page on its own.
 func (a *app) windowActions(cx *core.Scope) core.Node {
 	tr := msgsOf(cx)
 	if !a.configured() || a.page != pageSites && a.page != pageSite {
 		return core.View{}
 	}
-	nodes := []core.Node{a.rangeControl(cx)}
+	var nodes []core.Node
 	if s := a.site(a.open); a.page == pageSite && s != nil {
 		id := s.ID
 		nodes = append(nodes, a.toolButton(cx, lucide.SlidersHorizontal, tr.WebsiteSettings(), nil, func() { a.manageSite(id) }, "window-manage"))

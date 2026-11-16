@@ -1040,6 +1040,12 @@ func TestWindowShowsWebsitesBesideTheirPages(t *testing.T) {
 			t.Errorf("no %q in %q", s, tt.Texts())
 		}
 	}
+	if len(tt.Query("sidebar-header >> range")) == 0 || len(tt.Query("content-header >> range")) != 0 {
+		t.Error("the range is not at the end of the sidebar's bar")
+	}
+	if len(tt.Query("role:adjustable")) != 0 {
+		t.Error("the sidebar resizes")
+	}
 	tt.Press("window-site-b")
 	tt.WaitUntil(5*time.Second, func() bool { return a.page == pageSite && a.loading == 0 })
 	if a.open != "b" || len(tt.Query("detail-b")) == 0 {
@@ -1074,6 +1080,9 @@ func TestWindowBeforeConnectingShowsTheConnectForm(t *testing.T) {
 	}
 	if tt.hasText("Visitors / Views") {
 		t.Error("the sidebar lists websites before connecting")
+	}
+	if len(tt.Query("range")) != 0 {
+		t.Error("the range shows before connecting")
 	}
 }
 
