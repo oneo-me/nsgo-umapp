@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nsgo-dev/nsgo/base"
 	"github.com/nsgo-dev/nsgo/core"
 	"github.com/nsgo-dev/nsgo/icons/lucide"
 	"github.com/nsgo-dev/nsgo/ui"
@@ -19,7 +18,6 @@ const (
 
 // windowRoot is the main window: the panel's list in a sidebar beside the page of the website chosen there, wider. Both follow the same state, so a website chosen here is the panel's too.
 func (a *app) windowRoot(cx *core.Scope) core.Node {
-	base.SetScrollbarTheme(cx, ui.ScrollbarTheme(cx))
 	a.bindKeys(cx)
 	tr := msgsOf(cx)
 	open := core.NewSignal(cx, true)

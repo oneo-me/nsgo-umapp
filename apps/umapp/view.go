@@ -25,7 +25,6 @@ const (
 )
 
 func (a *app) root(cx *core.Scope) core.Node {
-	base.SetScrollbarTheme(cx, ui.ScrollbarTheme(cx))
 	a.bindKeys(cx)
 	colors := ui.ColorsOf(cx)
 	style := ui.FillRest.Merge(core.Style{FontSize: 13, Overflow: core.Hidden})

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Show NSGo's own scroll bars, which appear under the pointer and drag, in place of thin ones drawn over them.
+
 ## [0.2026.5] - 2026-11-18
 
 Umapp shows the websites of its window in a sidebar, with a Window menu and quieter counts.
