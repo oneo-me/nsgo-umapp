@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.2026.5] - 2026-11-18
+
+Umapp shows the websites of its window in a sidebar, with a Window menu and quieter counts.
+
 - Add a Window menu to the menu bar while the window can open.
 - Show the panel's list, with its totals, trends and counts, in the window's sidebar, the website chosen there beside it, under the range in a sidebar of fixed width.
 - Show counts of visitors online, on websites, tags, pages and countries, without a dot before them, their color telling whether anyone is.
