@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 - Show NSGo's own scroll bars, which appear under the pointer and drag, in place of thin ones drawn over them.
+- Stop the window opened from the panel's bar closing at the first click in it.
 
 ## [0.2026.5] - 2026-11-18
 

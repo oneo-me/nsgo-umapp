@@ -192,9 +192,12 @@ func (s *shell) openWindow(cx *core.Scope) {
 		s.window.Focus()
 		return
 	}
-	s.window = desktop.OpenWindow(cx, desktop.WindowOptions{Title: s.a.msgs().AppName(), Key: "main",
-		Width: windowWidth, Height: windowHeight,
-		Constraints: desktop.WindowConstraints{MinWidth: 860, MinHeight: 480}}, s.a.windowRoot)
+	// The app's scope owns the window: opened from the panel's bar, the page's region running then would close it as it builds again.
+	cx.Run(func() {
+		s.window = desktop.OpenWindow(cx, desktop.WindowOptions{Title: s.a.msgs().AppName(), Key: "main",
+			Width: windowWidth, Height: windowHeight,
+			Constraints: desktop.WindowConstraints{MinWidth: 860, MinHeight: 480}}, s.a.windowRoot)
+	})
 	if s.window == nil {
 		return
 	}

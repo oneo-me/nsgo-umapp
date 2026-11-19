@@ -1103,6 +1103,29 @@ func TestPanelOffersTheWindow(t *testing.T) {
 	}
 }
 
+// The window the panel's bar opens stays open as the page it shows changes, which builds the panel's regions again.
+func TestWindowFromThePanelOutlivesItsPage(t *testing.T) {
+	a := testApp(t, newFake())
+	a.refresh()
+	s := &shell{a: a}
+	app := nsgotest.StartApp(t, func(cx *core.Scope) {
+		cx.SetLocale("en")
+		a.attach(cx)
+		a.openWindow = func() { s.openWindow(cx) }
+		cx.SetMainView(a.root)
+	}, nsgotest.Environment(core.Environment{OS: core.OSMacOS}))
+	app.WaitUntil(5*time.Second, func() bool { return a.loading == 0 })
+	app.Press("open-window")
+	if s.window == nil || s.window.Closed() {
+		t.Fatal("no window opened")
+	}
+	app.Post(func() { a.openSite("b") })
+	app.Settle()
+	if s.window.Closed() {
+		t.Error("the window closed as its page changed")
+	}
+}
+
 func TestAddFromCloudflare(t *testing.T) {
 	f := newFake()
 	f.ownServer = true
