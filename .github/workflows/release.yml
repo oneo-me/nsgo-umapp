@@ -1,6 +1,6 @@
 name: Release
 
-# Publishes a GitHub release when a version tag is pushed. A maintainer sets apps/umapp/nsgo.yaml's version, turns CHANGELOG.md's `## [Unreleased]` into `## [X.Y.Z] - YYYY-MM-DD` above a fresh `## [Unreleased]`, merges that to main, then pushes the tag vX.Y.Z on main's commit. This workflow refuses a tag that is not on main, does not match apps/umapp/nsgo.yaml or has no changelog section, builds the macOS app against NSGo's latest main, signs the installers with the NSGO_UPDATES_KEY secret for the appcasts, and publishes the section as the release's notes.
+# Publishes a GitHub release when a version tag is pushed. A maintainer sets apps/umapp/nsgo.yaml's version, turns CHANGELOG.md's `## [Unreleased]` into `## [X.Y.Z] - YYYY-MM-DD` above a fresh `## [Unreleased]`, merges that to main, then pushes the tag vX.Y.Z on main's commit. This workflow refuses a tag that is not on main, does not match apps/umapp/nsgo.yaml or has no changelog section, builds the macOS app against the NSGo commit apps/umapp/go.mod pins, signs the installers with the NSGO_UPDATES_KEY secret for the appcasts, and publishes the section as the release's notes.
 #
 # Assets upload one at a time: the install scripts of the systems the release has installers for, each installer followed by its checksum, then the appcasts the apps check for updates. The release page lists them by name whatever the order.
 
@@ -30,13 +30,6 @@ jobs:
           path: nsgo-umapp
           persist-credentials: false
           fetch-depth: 0
-      # apps/umapp/go.mod replaces NSGo with ../../../nsgo: this checkout, beside Umapp's.
-      - name: Check out NSGo
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: nsgo-dev/nsgo
-          path: nsgo
-          persist-credentials: false
       - name: Check the tag
         id: version
         working-directory: nsgo-umapp

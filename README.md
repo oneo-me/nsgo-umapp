@@ -75,7 +75,7 @@ On iPhone and in a browser, the app opens straight to the panel. The key is kept
 
 ## Development
 
-The repository holds each app under `apps/`. The Go module of the Umapp app and its packaging configuration, `nsgo.yaml`, live in `apps/umapp`. NSGo comes from a checkout beside this repository's, which `go.mod` replaces it with. Run Go and NSGo commands from `apps/umapp`:
+The repository holds each app under `apps/`. The Go module of the Umapp app and its packaging configuration, `nsgo.yaml`, live in `apps/umapp`. `go.mod` pins NSGo to a commit of its `main`. Run Go and NSGo commands from `apps/umapp`:
 
 ```sh
 cd apps/umapp

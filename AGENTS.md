@@ -5,7 +5,7 @@ Umapp is a native menu bar app, and an iPhone app, that shows the websites of an
 ## Principles
 
 - Keep each app under `apps/`: the Go code, `nsgo.yaml` and runtime payload of the Umapp app in `apps/umapp`; run Go and NSGo commands there. The server lives in `apps/server`; install its packages at the root, which holds the npm workspaces, and run its scripts there. The website lives in `apps/website` and uses Bun on its own, outside the workspaces.
-- NSGo comes from the checkout `apps/umapp/go.mod` replaces it with; follow that repository's own instructions when changing it.
+- `apps/umapp/go.mod` pins NSGo to a commit of its `main`; update it with `go get github.com/nsgo-dev/nsgo@main`, and change NSGo itself in its own repository.
 - Keep documentation at the repository root.
 - Use NSGo's `ui` components and its default theme; build reusable UI in NSGo rather than here.
 - Pad every side of a bar, page or row alike: `gutter` for bars and pages, `inset` for rows.

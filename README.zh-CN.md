@@ -75,7 +75,7 @@ curl -fsSL https://github.com/oneo-me/nsgo-umapp/releases/latest/download/instal
 
 ## 开发
 
-仓库把每个应用放在 `apps/` 下。Umapp 应用的 Go 模块和打包配置 `nsgo.yaml` 位于 `apps/umapp`。NSGo 来自与本仓库并列的检出，由 `go.mod` 的 replace 指向。请在 `apps/umapp` 下运行 Go 和 NSGo 命令：
+仓库把每个应用放在 `apps/` 下。Umapp 应用的 Go 模块和打包配置 `nsgo.yaml` 位于 `apps/umapp`。`go.mod` 把 NSGo 固定在其 `main` 的某个提交上。请在 `apps/umapp` 下运行 Go 和 NSGo 命令：
 
 ```sh
 cd apps/umapp
